@@ -8,4 +8,5 @@ class prod_config(object):
 
 class dev_config(object):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:apktool@%:3306/myblog'
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://apktool:Apktool@2017@localhost/myblog'
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
