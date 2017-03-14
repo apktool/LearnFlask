@@ -13,3 +13,9 @@ def make_shell_context():
 
 if __name__ == '__main__':
     manger.run()
+
+
+'''
+python3 manage.py shell
+>>> db.create_all()
+'''
