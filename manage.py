@@ -12,7 +12,8 @@ def make_shell_context():
                 db=models.db,
                 User=models.User,
                 Post=models.Post,
-                Comment=models.Comment)
+                Comment=models.Comment,
+                Tag=models.Tag)
 
 
 if __name__ == '__main__':
