@@ -3,3 +3,4 @@ flask-script
 sqlalchemy
 flask-SQLALchemy
 Flask-Migrate
+Flask-WTF
