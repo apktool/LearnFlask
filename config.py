@@ -1,5 +1,5 @@
 class basic_config(object):
-    pass
+    SECRET_KEY = '1fb6c473ae99b84387f0136d3947def0'
 
 
 class prod_config(object):
