@@ -1,11 +1,13 @@
 from flask import render_template
 from sqlalchemy import func
+import datetime
 
 from main import app
 from models import db, User, Post, Tag, Comment, posts_tags
+from wt_forms import CommentForm
 
 
-def sidbar_data():
+def sidebar_data():
     recent = db.session.query(Post).order_by(
         Post.publish_date.desc()
     ).limit(5).all()
@@ -27,7 +29,7 @@ def home(page=1):
         Post.publish_date.desc()
     ).paginate(page, 10)
 
-    recent, top_tags = sidbar_data()
+    recent, top_tags = sidebar_data()
 
     return render_template('home.html',
         posts=posts,
@@ -35,26 +37,37 @@ def home(page=1):
         top_tags=top_tags)
 
 
-@app.route('/post/<string:post_id>')
+@app.route('/post/<string:post_id>', methods=('GET', 'POST'))
 def post(post_id):
+    form = CommentForm()
+    if form.validate_on_submit():
+        new_comment = Comment(id=str(uuid4()),
+                              name=form.name.data)
+        new_comment.text = form.text.data
+        new_comment.date = datetime.datetime.now()
+        new_comment.post_id = post_id
+        db.session.add(new_comment)
+        db.session.commit()
+
     post = db.session.query(Post).get_or_404(post_id)
     tags = post.tags
-    comment = post.comment.order_by(Comment.date.desc()).all()
+    comments = post.comments.order_by(Comment.date.desc()).all()
     recent, top_tags = sidebar_data()
     
     return render_template('post.html',
                            post=post,
                            tags=tags,
                            comments=comments,
+                           form=form,
                            recent=recent,
                            top_tags=top_tags)
 
 
 @app.route('/tag/<string:tag_name>')
 def tag(tag_name):
-    tag=db.session.query(Tag).filter_by(title=tag_name).first_or_404()
-    posts=tag.posts_tags.order_by(Post.publish_date.desc()).all()
-    recent, top_tags = sidbar_data()
+    tag=db.session.query(Tag).filter_by(name=tag_name).first_or_404()
+    posts=tag.posts.order_by(Post.publish_date.desc()).all()
+    recent, top_tags = sidebar_data()
 
     return render_template('tag.html',
                           tag=tag,
@@ -74,3 +87,8 @@ def user(username):
                            posts=posts,
                            recent=recent,
                            top_tags=top_tags)
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 404
