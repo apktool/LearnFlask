@@ -4,7 +4,7 @@ import main
 import models
 
 manager = Manager(main.app)
-manager.add_command('server', Server())
+manager.add_command('server', Server(host='127.0.01', port=8089))
 migrate = Migrate(main.app, models.db)
 manager.add_command("db", MigrateCommand)
 
@@ -16,7 +16,8 @@ def make_shell_context():
                 User=models.User,
                 Post=models.Post,
                 Comment=models.Comment,
-                Tag=models.Tag)
+                Tag=models.Tag,
+                Server=Server)
 
 
 if __name__ == '__main__':
