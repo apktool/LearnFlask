@@ -1,29 +1,27 @@
-from flask_script import Manager, Server
+#!/usr/local/bin/env python
+
+import os
+from app import create_app, db
+from app.models import User, Role
+from flask_script import Manager, Shell, Server
 from flask_migrate import Migrate, MigrateCommand
-from app import models, app
 
+app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 manager = Manager(app)
-manager.add_command('server', Server(host='127.0.0.1', port=8089))
-migrate = Migrate(app, models.db)
-manager.add_command("db", MigrateCommand)
+migrate = Migrate(app, db)
 
 
-@manager.shell
 def make_shell_context():
     return dict(app=app,
-                db=models.db,
-                User=models.User,
-                Post=models.Post,
-                Comment=models.Comment,
-                Tag=models.Tag,
-                Server=Server)
+                db=db,
+                User=User,
+                Role=Role)
+
+
+manager.add_command('server', Server(host='127.0.0.1', port=8089))
+manager.add_command('shell', Shell(make_context=make_shell_context))
+manager.add_command("db", MigrateCommand)
 
 
 if __name__ == '__main__':
     manager.run()
-
-
-'''
-python3 manage.py shell
->>> db.create_all()
-'''

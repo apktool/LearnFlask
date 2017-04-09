@@ -1,19 +1,25 @@
-from flask import Flask, redirect, url_for
-from config import dev_config, basic_config
-from .models import db
-from .controllers import blog
+from flask import Flask
+from flask_bootstrap import Bootstrap
+from flask_moment import Moment
+from flask_sqlalchemy import SQLAlchemy
+from config import config
 
-app = Flask(__name__)
-app.config.from_object(dev_config)
-app.config.from_object(basic_config)
 
-db.init_app(app)
+bootstrap = Bootstrap()
+moment = Moment()
+db = SQLAlchemy()
 
-@app.route('/')
-def index():
-    return redirect(url_for('blog.home'))
 
-app.register_blueprint(blog.blog_blueprint)
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
 
-if __name__ == '__main__':
-    app.run()
+    bootstrap.init_app(app)
+    moment.init_app(app)
+    db.init_app(app)
+
+    from .main import main as main_blueprint
+    app.register_blueprint(main_blueprint)
+
+    return app
