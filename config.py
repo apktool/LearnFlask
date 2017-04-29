@@ -14,7 +14,7 @@ class Config:
     FLASK_MAIL_SUBJECT_PREFIX = '[Blog]'
     FLASK_MAIL_SENDER = 'Flask Admin <example@qq.com>'
     FLASK_ADMIN = os.environ.get('FLASK_ADMIN')
-    FLASKY_POSTS_PER_PAGE = 20
+    FLASK_POSTS_PER_PAGE = 20
 
     @staticmethod
     def init_app(app):
