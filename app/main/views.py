@@ -121,6 +121,22 @@ def edit(id):
     return render_template('edit_post.html', form=form)
 
 
+@main.route('/follow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('Invalid user.')
+        return redirect(url_for('.index'))
+    if current_user.is_following(user):
+        flash('You are already following this user.')
+        return redirect(url_for('.user', username=username))
+    current_user.follow(user)
+    flash('You are now following %s.' % username)
+    return redirect(url_for('.user', username=username))
+
+
 @main.route('/followers/<username>')
 def followers(username):
     user = User.query.filter_by(username=username).first()
@@ -151,12 +167,20 @@ def followed_by(username):
                            endpoint='.followed_by', pagination=pagination, follows=follows)
 
 
-@main.route('/all')
+@main.route('/unfollow/<username>')
 @login_required
-def show_all():
-    resp = make_response(redirect(url_for('.index')))
-    resp.set_cookie('show_followed', '', max_age=30 * 24 * 60 * 60)
-    return resp
+@permission_required(Permission.FOLLOW)
+def unfollow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('Invalid user.')
+        return redirect(url_for('.index'))
+    if not current_user.is_following(user):
+        flash('You are not following this user.')
+        return redirect(url_for('.user', username=username))
+    current_user.unfollow(user)
+    flash('You are not following %s anymore.' % username)
+    return redirect(url_for('.user', username=username)) 
 
 
 @main.route('/followed')
@@ -164,6 +188,14 @@ def show_all():
 def show_followed():
     resp = make_response(redirect(url_for('.index')))
     resp.set_cookie('show_followed', '1', max_age=30 * 24 * 60 * 60)
+    return resp
+
+
+@main.route('/all')
+@login_required
+def show_all():
+    resp = make_response(redirect(url_for('.index')))
+    resp.set_cookie('show_followed', '', max_age=30 * 24 * 60 * 60)
     return resp
 
 
