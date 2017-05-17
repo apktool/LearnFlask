@@ -153,7 +153,6 @@ def unfollow(username):
     return redirect(url_for('.user', username=username)) 
 
 
-@main.route('/followed')
 @main.route('/followers/<username>')
 def followers(username):
     user = User.query.filter_by(username=username).first()
@@ -184,6 +183,7 @@ def followed_by(username):
                            endpoint='.followed_by', pagination=pagination, follows=follows)
 
 
+@main.route('/followed')
 @login_required
 def show_followed():
     resp = make_response(redirect(url_for('.index')))
