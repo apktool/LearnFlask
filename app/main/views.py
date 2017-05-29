@@ -232,3 +232,9 @@ def moderate_disable(id):
     db.session.add(comment)
     return redirect(url_for('.moderate',
                             page=request.args.get('page', 1, type=int)))
+
+
+@main.route('/upload')
+@login_required
+def page_upload():
+    return render_template("upload.html")
