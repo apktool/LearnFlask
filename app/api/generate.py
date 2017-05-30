@@ -1,6 +1,9 @@
 from markdown import Markdown
+from flask_login import current_user
 import os
 import pypinyin
+from .. import db
+from ..models import Post
 import pdb
 
 INPUT_CONTENT = './app/blog/MD'
@@ -14,10 +17,11 @@ class generate(object):
         self._current_file_index = None
         self._pinyin_names = set()
         self._output_content = ''
+        self._save_type = {}
 
     def load_md_file(self, f_name):
         if os.path.splitext(f_name)[1].lower() == ".md":
-            self._md_files.append(os.path.join(self._md_file_path, f_name))
+            self._md_files.append(f_name)
 
     def load_all_md_files(self, folder):
         self._md_file_path = folder
@@ -26,13 +30,14 @@ class generate(object):
                 self.load_md_file(f)
 
     def gen_to_html(self, f_name):
+        f_name = os.path.join(self._md_file_path, f_name)
         file_base_name = os.path.splitext(os.path.basename(f_name))[0]
         # self._current_file_index = self._str2pinyin(file_base_name)
         self._current_file_index = file_base_name
         self._pinyin_names.add(self._current_file_index)
         out_path = os.path.join(OUTPUT_CONTENT, self._current_file_index + ".html")
-        html = self._render(f_name)
-        self._save_html(out_path, html)
+        self._render(f_name)
+        self._save_html(out_path)
 
     def gen_all_to_html(self):
         for f in self._md_files:
@@ -48,7 +53,7 @@ class generate(object):
 
     def _render(self, md_file):
         with open(md_file, "r") as f:
-            text = f.read()
+            self._save_type['text'] = f.read()
             md = Markdown(
                 extensions=[
                     "fenced_code",
@@ -60,7 +65,7 @@ class generate(object):
                     "wikilinks",
                 ],
             )
-            html = md.convert(text)
+            self._save_type['html'] = md.convert(self._save_type['text'])
             meta = md.Meta if hasattr(md, "Meta") else {}
             toc = md.toc if hasattr(md, "toc") else ""
             # create_index(md_file, meta)
@@ -81,12 +86,15 @@ class generate(object):
             )
             '''
 
-        return html
+        # return html
 
-    def _save_html(self, out_path, html):
+    def _save_html(self, out_path):
         base_folder = os.path.dirname(out_path)
         if not os.path.exists(base_folder):
             os.makedirs(base_folder)
 
         with open(out_path, 'w+') as f:
-            f.write(html)
+            f.write(self._save_type['html'])
+
+        post = Post(body=self._save_type['text'], body_html=self._save_type['html'], author=current_user._get_current_object())
+        db.session.add(post)

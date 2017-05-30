@@ -26,6 +26,9 @@
 				{% if current_user.is_authenticated %}
 				<li><a href="{{ url_for('main.user', username=current_user.username) }}">Profile</a></li>
 				{% endif %}
+				<li><a href="{{ url_for('main.posts_all') }}"><i class="icon-list-alt" style="margin-right: 3px"></i>所有文章</a></li>
+				<li><a href="{% block tags_url %}{% endblock %}"><i class="icon-tags" style="margin-right: 3px"></i>标签云</a> </li>
+				<li><a href="{% block about_url %}{% endblock %}"><i class=" icon-star" style="margin-right: 3px"></i>关于</a>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				{% if current_user.can(Permission.MODERATE_COMMENTS) %}
@@ -50,7 +53,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container" style="min-height: 570px">
 	{% for message in get_flashed_messages() %}
 	<div class="alert alert-warning">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -61,7 +64,6 @@
 	{% block page_content %}{% endblock %}
 </div>
 {% endblock %}
-
 
 {% block scripts %}
 {{ super() }}

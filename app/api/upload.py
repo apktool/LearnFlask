@@ -21,8 +21,8 @@ def upload_article():
     '''
 
     geninstance = generate()
-    geninstance.load_md_files(f_name)
-    geninstance.gen_to_html()
+    geninstance.load_md_file(f_name)
+    geninstance.gen_to_html(f_name)
     # pdb.set_trace()
     # IndexData.reload_index_data()
     return redirect(url_for("main.index"))
