@@ -1,17 +1,29 @@
 from markdown import Markdown
 from flask_login import current_user
-import os
-import pypinyin
-from .. import db
 from ..models import Post
+from .. import db
+import os
 import pdb
+import shutil
+import shelve
+import pypinyin
 
 INPUT_CONTENT = './app/blog/MD'
 OUTPUT_CONTENT = './app/blog/HTML'
+OUT_CONTENT = './app/blog/OUT/'
+INDEX_DAT = './app/blog/OUT/index.dat'
+
+# 文章索引
+ARTICLE_INDEX = {}
+# 标签倒排索引
+TAG_INVERTED_INDEX = {}
+# 作者倒排索引
+AUTHOR_INVERTED_INDEX = {}
+
 
 class generate(object):
 
-    def __init__ (self):
+    def __init__(self):
         self._md_files = []
         self._md_file_path = INPUT_CONTENT
         self._current_file_index = None
@@ -43,10 +55,10 @@ class generate(object):
         for f in self._md_files:
             self.gen_to_html(f)
 
-    def _str2pinyin(hans, style=pypinyin.FIRST_LETTER):
+    def _str2pinyin(self, hans, style=pypinyin.FIRST_LETTER):
         pinyin_str = pypinyin.slug(hans, style=style, separator="")
         num = 2
-        while pinyin_str in _pinyin_names:
+        while pinyin_str in self._pinyin_names:
             pinyin_str += str(num)
             num += 1
         return pinyin_str
@@ -70,7 +82,7 @@ class generate(object):
             toc = md.toc if hasattr(md, "toc") else ""
             # create_index(md_file, meta)
 
-            #template = env.get_template("base_article.html")
+            # template = env.get_template("base_article.html")
             '''
             text = template.render(
                 blog_content=html
@@ -98,3 +110,15 @@ class generate(object):
 
         post = Post(body=self._save_type['text'], body_html=self._save_type['html'], author=current_user._get_current_object())
         db.session.add(post)
+
+    def dump_index(self):
+        dat = shelve.open(INDEX_DAT)
+        pdb.set_trace()
+        dat["article_index"] = ARTICLE_INDEX
+        dat["tag_inverted_index"] = TAG_INVERTED_INDEX
+        dat["author_inverted_index"] = AUTHOR_INVERTED_INDEX
+        dat.close()
+
+    def clean(self):
+        if os.path.exists(OUT_CONTENT):
+            shutil.rmtree(OUT_CONTENT)

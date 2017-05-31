@@ -12,8 +12,8 @@ from ..decorators import admin_required, permission_required
 def index():
     return render_template('index.html')
 
-@main.route('/posts_all', methods=['GET', 'POST'])
-def posts_all():
+@main.route('/posts', methods=['GET', 'POST'])
+def posts():
     form = PostForm()
     if current_user.can(Permission.WRITE_ARTICLES) and form.validate_on_submit():
         post = Post(body=form.body.data, author=current_user._get_current_object())
@@ -30,7 +30,7 @@ def posts_all():
     pagination = query.order_by(Post.timestamp.desc()).paginate(
         page, per_page=current_app.config['FLASK_POSTS_PER_PAGE'], error_out=False)
     posts = pagination.items
-    return render_template('posts_all.html', form=form, posts=posts,
+    return render_template('posts.html', form=form, posts=posts,
                            pagination=pagination, show_followed=show_followed)
 
 

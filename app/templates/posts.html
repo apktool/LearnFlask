@@ -11,7 +11,7 @@
 {% include '_posts.html' %}
 {% if pagination %}
 <div class="pagination">
-	{{ macros.pagination_widget(pagination, '.posts_all') }}
+	{{ macros.pagination_widget(pagination, '.posts') }}
 </div>
 {% endif %}
 {% endblock %}
@@ -19,4 +19,5 @@
 {% block scripts %}
 {{ super() }}
 {{ pagedown.include_pagedown() }}
+<script type="text/javascript" src="{{ url_for('static', filename='js/articles.js') }}"></script>
 {% endblock %}
