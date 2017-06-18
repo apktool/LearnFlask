@@ -19,8 +19,8 @@ class render(object):
 
         self._body_html_template = 'base_article.html'
         self._title_html_template = u"<div class='sidebar-module-inset'><h5 class='sidebar-title'><i class='icon-circle-blank side-icon'></i>标题</h5><p>{title_str}</p></div>"
-        self._author_html_template = u"<a href='' class='tag-index'>{author}</a>"
-        self._tag_html_template = u"<a href='/tag/{tag}/' class='tag-index'>{tag}</a>"
+        self._author_html_template = u"<a href='/user/{author}' class='tag-index'>{author}</a>"
+        self._tag_html_template = u"<a href='/tag/{tag}' class='tag-index'>{tag}</a>"
 
     def render_to_html(self):
         """渲染html页面

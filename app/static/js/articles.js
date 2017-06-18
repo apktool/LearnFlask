@@ -1,7 +1,7 @@
 var ARTICLE_ITEM_TEMPLATE = "" +
     "<div>" +
     "<div>" +
-    "<div class='ls-article-title'><a class='h3' href='/post/103'>{title}</a></div>" +
+    "<div class='ls-article-title'><a class='h3' href='/post/{<int:id>}'>{title}</a></div>" +
     "<div>" +
     "<span class='article-property' title='最后修改时间'><i class='article-icon icon-calendar'></i>{modify_time}</span>" +
     "<span class='article-property' title='作者'><i class='article-icon icon-user'></i>{author}</span>" +
@@ -13,7 +13,7 @@ var ARTICLE_ITEM_TEMPLATE = "" +
     "</div>";
 
 var TAG_TEMPLATE = "<a href='/tag/{tag}' class='tag-index'>{tag}</a>";
-var AUTHOR_TEMPLATE = "<a href='' class='author-index'>{author}</a>";
+var AUTHOR_TEMPLATE = "<a href='/user/{author}' class='author-index'>{author}</a>";
 
 function renderTags(tags) {
     var tagHtml = "";
@@ -57,6 +57,7 @@ function renderArticleItem(data) {
         if (data[key]["title"].length > 0) {
 
             articleHtml += ARTICLE_ITEM_TEMPLATE.replace(/\{articleId}/g, key)
+                .replace(/\{<int:id>}/g, key)
                 .replace(/\{title}/g, data[key]["title"])
                 .replace(/\{modify_time}/g, data[key]["modify_time"])
                 .replace(/\{author}/g, renderAuthors(data[key]["authors"]))

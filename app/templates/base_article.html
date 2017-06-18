@@ -1,13 +1,11 @@
 
-{% block title %}
-    {{ title }}
-{% endblock %}
-
 {% block head %}
+	<!--
     <link href="{{ static_root }}css/bootstrap.min.css" rel="stylesheet">
     <link href="{{ static_root }}css/font-awesome.min.css" rel="stylesheet">
     <link href="{{ static_root }}css/pygments/default.css" rel="stylesheet">
     <link href="{{ static_root }}css/blog/general.css" rel="stylesheet">
+	-->
 
     <style type="text/css">
         h1::before, h2::before, h3::before, h4::before, h5::before, h6::before {
@@ -153,10 +151,6 @@
     </style>
 
 {% endblock %}
-
-{% block articles_url %}/articles{% endblock %}
-{% block tags_url %}/tags{% endblock %}
-{% block about_url %}/about{% endblock %}
 
 {% block content %}
 
