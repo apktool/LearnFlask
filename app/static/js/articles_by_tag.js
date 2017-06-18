@@ -1,7 +1,7 @@
 var ARTICLE_ITEM_TEMPLATE = "" +
     "<div>" +
     "<div>" +
-    "<div class='ls-article-title'><a class='h3' href='/post/103'>{title}</a></div>" +
+    "<span><a class='h3 ls-article-title' href='/post/{articleId}'>{title}</a></span>" +
     "<div>" +
     "<span class='article-property' title='最后修改时间'><i class='article-icon icon-calendar'></i>{modify_time}</span>" +
     "<span class='article-property' title='作者'><i class='article-icon icon-user'></i>{author}</span>" +
@@ -52,6 +52,7 @@ function sort(data) {
 function renderArticleItem(data) {
     var data = sort(data);
     var articleHtml = "";
+    var count = 0;
     for (var key in data) {
 
         if (data[key]["title"].length > 0) {
@@ -62,13 +63,16 @@ function renderArticleItem(data) {
                 .replace(/\{author}/g, renderAuthors(data[key]["authors"]))
                 .replace(/\{summary}/g, data[key]["summary"])
                 .replace(/\{tags}/g, renderTags(data[key]["tags"]));
+            count++;
         }
     }
-    $("#post-body").html(articleHtml);
+    $("#article_item").html(articleHtml);
+    $("#count").text(count + " 篇");
 }
 
 $(document).ready(function () {
-    var url = "/gen/posts";
+    var tag = $("#tag").text();
+    var url = "/gen/tag/" + tag;
     $.ajax({
         type: "get",
         dateType: "json",
@@ -78,3 +82,5 @@ $(document).ready(function () {
         }
     });
 });
+
+

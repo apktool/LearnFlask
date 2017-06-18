@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}
+    All Tags
+{% endblock %}
+
+{% block head %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="container theme-showcase" style="min-height: 600px">
+        <div>
+            <h1>All Tags</h1>
+        </div>
+
+        <dl id="tags" class="dl-horizontal">
+        </dl>
+    </div>
+{% endblock %}
+
+{% block scripts%}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/tags.js') }}"></script>
+{% endblock %}

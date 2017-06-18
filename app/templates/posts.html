@@ -8,16 +8,17 @@
 <div class="page-header">
     <h1>Hello, {% if current_user.is_authenticated %}{{ current_user.username }}{% else %}Stranger{% endif %}!</h1>
 </div>
-{% include '_posts.html' %}
+{% include 'articles.html' %}
+<!--
 {% if pagination %}
 <div class="pagination">
 	{{ macros.pagination_widget(pagination, '.posts') }}
 </div>
 {% endif %}
+-->
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
 {{ pagedown.include_pagedown() }}
-<script type="text/javascript" src="{{ url_for('static', filename='js/articles.js') }}"></script>
 {% endblock %}

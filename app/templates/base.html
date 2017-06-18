@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block navbar %}
-<div class="navbar navbar-inverse" role="navigation">
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	<div class="container">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -26,11 +26,12 @@
 				{% if current_user.is_authenticated %}
 				<li><a href="{{ url_for('main.user', username=current_user.username) }}">Profile</a></li>
 				{% endif %}
-				<li><a href="{{ url_for('main.posts') }}"><i class="icon-list-alt" style="margin-right: 3px"></i>所有文章</a></li>
-				<li><a href="{% block tags_url %}{% endblock %}"><i class="icon-tags" style="margin-right: 3px"></i>标签云</a> </li>
+				<li><a href="{{ url_for('main.posts') }}"><i class="icon-list-alt" style="margin-right: 3px"></i>All Posts</a></li>
+				<li><a href="{{ url_for('main.tags') }}"><i class="icon-tags" style="margin-right: 3px"></i>Tag Cloud</a> </li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
 				{% if current_user.can(Permission.MODERATE_COMMENTS) %}
+				<li><a href="{{ url_for('api.generate_to_index') }}">Generate index</a></li>
 				<li><a href="{{ url_for('main.moderate') }}">Moderate Comments</a></li>
 				{% endif %}
 				{% if current_user.is_authenticated %}
@@ -49,6 +50,7 @@
 		</div>
 	</div>
 </div>
+<br/> <br/> <br/> <br/> <br/>
 {% endblock %}
 
 {% block content %}

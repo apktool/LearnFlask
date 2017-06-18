@@ -98,7 +98,7 @@ def post(id):
                           author=current_user._get_current_object())
         db.session.add(comment)
         flash('Your comment has been published.')
-        return redirect(url_for('.post', id=post.id, page=-1))
+        return redirect(url_for('.post', id=post.title, page=-1))
     page = request.args.get('page', 1, type=int)
     if page == -1:
         page = (post.comments.count() - 1) // current_app.config['FLASK_COMMENTS_PER_PAGE'] + 1
@@ -242,3 +242,12 @@ def moderate_disable(id):
 @login_required
 def page_upload():
     return render_template("upload.html")
+
+@main.route('/tags')
+def tags():
+    return render_template("tags.html")
+
+
+@main.route('/tag/<tag>')
+def page_article_by_tag(tag):
+    return render_template("articles_by_tag.html", tag=tag)

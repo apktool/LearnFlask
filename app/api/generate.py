@@ -1,5 +1,5 @@
-from markdown import Markdown
 from flask_login import current_user
+from datetime import datetime
 from ..models import Post
 from .. import db
 import os
@@ -21,15 +21,16 @@ TAG_INVERTED_INDEX = {}
 AUTHOR_INVERTED_INDEX = {}
 
 
-class generate(object):
+class generate_html(object):
 
-    def __init__(self):
+    def __init__(self, meta):
         self._md_files = []
         self._md_file_path = INPUT_CONTENT
         self._current_file_index = None
         self._pinyin_names = set()
         self._output_content = ''
         self._save_type = {}
+        self.meta = meta
 
     def load_md_file(self, f_name):
         if os.path.splitext(f_name)[1].lower() == ".md":
@@ -47,9 +48,11 @@ class generate(object):
         # self._current_file_index = self._str2pinyin(file_base_name)
         self._current_file_index = file_base_name
         self._pinyin_names.add(self._current_file_index)
-        out_path = os.path.join(OUTPUT_CONTENT, self._current_file_index + ".html")
-        self._render(f_name)
-        self._save_html(out_path)
+
+        self._save_type['html'] = self.meta.get('html')
+
+        # self._render(f_name)
+        self._save_html_text()
 
     def gen_all_to_html(self):
         for f in self._md_files:
@@ -63,62 +66,73 @@ class generate(object):
             num += 1
         return pinyin_str
 
-    def _render(self, md_file):
-        with open(md_file, "r") as f:
+    def _save_html_text(self):
+        md_path = os.path.join(INPUT_CONTENT, self._current_file_index + ".md")
+        html_path = os.path.join(OUTPUT_CONTENT, self._current_file_index + ".html")
+
+        with open(md_path, "r") as f:
             self._save_type['text'] = f.read()
-            md = Markdown(
-                extensions=[
-                    "fenced_code",
-                    "codehilite(css_class=highlight,linenums=None)",
-                    "meta",
-                    "admonition",
-                    "tables",
-                    "toc",
-                    "wikilinks",
-                ],
-            )
-            self._save_type['html'] = md.convert(self._save_type['text'])
-            meta = md.Meta if hasattr(md, "Meta") else {}
-            toc = md.toc if hasattr(md, "toc") else ""
-            # create_index(md_file, meta)
 
-            # template = env.get_template("base_article.html")
-            '''
-            text = template.render(
-                blog_content=html
-                """,
-                static_root=STATIC_ROOT,
-                title=ARTICLE_INDEX[_current_file_index].get("title"),
-                title_html=render_title_html(ARTICLE_INDEX[_current_file_index].get("title")),
-                summary=ARTICLE_INDEX[_current_file_index].get("summary", ""),
-                authors=render_authors_html(ARTICLE_INDEX[_current_file_index].get("authors")),
-                tags=render_tags_html(ARTICLE_INDEX[_current_file_index].get("tags")),
-                toc=toc,
-                """
-            )
-            '''
-
-        # return html
-
-    def _save_html(self, out_path):
-        base_folder = os.path.dirname(out_path)
-        if not os.path.exists(base_folder):
-            os.makedirs(base_folder)
-
-        with open(out_path, 'w+') as f:
+        with open(html_path, 'w+') as f:
             f.write(self._save_type['html'])
 
         post = Post(body=self._save_type['text'], body_html=self._save_type['html'], author=current_user._get_current_object())
         db.session.add(post)
 
+    def clean(self):
+        if os.path.exists(OUT_CONTENT):
+            shutil.rmtree(OUT_CONTENT)
+
+
+class generate_index(object):
+    def __init__(self, meta):
+        self.meta = meta.get('meta')
+
     def dump_index(self):
         dat = shelve.open(INDEX_DAT)
-        pdb.set_trace()
         dat["article_index"] = ARTICLE_INDEX
         dat["tag_inverted_index"] = TAG_INVERTED_INDEX
         dat["author_inverted_index"] = AUTHOR_INVERTED_INDEX
         dat.close()
 
-    def clean(self):
-        if os.path.exists(OUT_CONTENT):
-            shutil.rmtree(OUT_CONTENT)
+    def create_index(self, filename):
+        self._current_file_index = os.path.splitext(os.path.basename(filename))[0]
+        self._index_tags(self.meta.get("tags", []), self._current_file_index)
+        self._index_authors(self.meta.get("authors", []), self._current_file_index)
+
+        title = self.meta.get("title", [""])[0]
+        if title == "":
+            title = os.path.splitext(os.path.basename(filename))[0]
+
+        publish_dates = self.meta.get("publish_date", [])
+        if len(publish_dates) == 0:
+            publish_date = self._parse_time(os.path.getctime(filename), "%Y-%m-%d")
+        else:
+            publish_date = publish_dates[0]
+
+        ARTICLE_INDEX[self._current_file_index] = {
+            "filename": filename,
+            "modify_time": self._parse_time(os.path.getmtime(filename)),
+            "title": title,
+            "summary": self.meta.get("summary", [u""])[0],
+            "authors": self.meta.get("authors", [u"匿名"]),
+            "publish_date": publish_date,
+            "tags": self.meta.get("tags", [])
+        }
+
+    def _parse_time(self, timestamp, pattern="%Y-%m-%d %H:%M:%S"):
+        return datetime.fromtimestamp(timestamp).strftime(pattern)
+
+    def _index_tags(self, tags, fid):
+        for tag in tags:
+            if tag in TAG_INVERTED_INDEX:
+                TAG_INVERTED_INDEX[tag].append(fid)
+            else:
+                TAG_INVERTED_INDEX[tag] = [fid]
+
+    def _index_authors(self, authors, fid):
+        for author in authors:
+            if author in AUTHOR_INVERTED_INDEX:
+                AUTHOR_INVERTED_INDEX[author].append(fid)
+            else:
+                AUTHOR_INVERTED_INDEX[author] = [fid]

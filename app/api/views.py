@@ -2,7 +2,8 @@ from flask import redirect, url_for, request, jsonify, current_app
 from flask_login import login_required
 from werkzeug.utils import secure_filename
 from .helper import IndexData
-from .generate import generate
+from .generate import generate_html, generate_index
+from .render import render
 from . import api
 from ..decorators import admin_required
 import os
@@ -15,19 +16,24 @@ INPUT_CONTENT = './app/blog/MD'
 @login_required
 def upload_article():
     f = request.files['md_file']
-    f_name = secure_filename(f.filename)
-    path = os.path.join(os.getcwd(), INPUT_CONTENT, f_name)
-    f.save(path)
+    name = secure_filename(f.filename)
+    f_name = os.path.join(os.getcwd(), INPUT_CONTENT, name)
+    f.save(f_name)
 
     '''
-    geninstance = generate()
+    geninstance = generate_html()
     geninstance.load_all_md_files(INPUT_CONTENT)
     geninstance.gen_all_to_html()
     '''
 
-    geninstance = generate()
-    geninstance.load_md_file(f_name)
-    geninstance.gen_to_html(f_name)
+    renderinstance = render(f_name)
+    meta = renderinstance.render_to_html()
+
+    genhtmlinstance = generate_html(meta)
+    genhtmlinstance.load_md_file(f_name)
+    genhtmlinstance.gen_to_html(f_name)
+
+    # genindexinstance = generate_index(meta)
     # pdb.set_trace()
     # IndexData.reload_index_data()
     return redirect(url_for("main.index"))
@@ -59,14 +65,28 @@ def reload_index():
 
 
 @api.route('/gen/generate')
-def generate_index():
+def generate_to_index():
     try:
-        geninstance = generate()
-        geninstance.load_all_md_files(INPUT_CONTENT)
-        geninstance.gen_all_to_html()
+        '''
+        genhtmlinstance = generate_html()
+        genhtmlinstance.load_all_md_files(INPUT_CONTENT)
+        genhtmlinstance.gen_all_to_html()
         # geninstance.clean()
-        geninstance.dump_index()
-        IndexData.reload_index_data()
+        '''
+        
+        for root, _, f_names in os.walk(INPUT_CONTENT):
+            for f_name in f_names:
+                f_name = os.path.join(INPUT_CONTENT, f_name)
+
+                renderinstance = render(f_name)
+                meta = renderinstance.render_to_html()
+
+                genindexinstance = generate_index(meta)
+                genindexinstance.create_index(f_name)
+                genindexinstance.dump_index()
+
+                IndexData.reload_index_data()
+
         return jsonify({"msg": "ok"})
     except Exception as e:
         current_app.logger.exception(e)
