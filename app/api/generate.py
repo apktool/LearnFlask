@@ -88,6 +88,12 @@ class generate_index(object):
     def __init__(self, meta):
         self.meta = meta.get('meta')
 
+    def drop_index(self):
+        global TAG_INVERTED_INDEX, ARTICLE_INDEX, AUTHOR_INVERTED_INDEX
+        ARTICLE_INDEX = {}
+        TAG_INVERTED_INDEX = {}
+        AUTHOR_INVERTED_INDEX = {}
+
     def dump_index(self):
         dat = shelve.open(INDEX_DAT)
         dat["article_index"] = ARTICLE_INDEX

@@ -66,6 +66,7 @@ def reload_index():
 
 @api.route('/gen/generate')
 def generate_to_index():
+    flag = True
     try:
         '''
         genhtmlinstance = generate_html()
@@ -82,6 +83,9 @@ def generate_to_index():
                 meta = renderinstance.render_to_html()
 
                 genindexinstance = generate_index(meta)
+                if flag is True:
+                    flag = False
+                    genindexinstance.drop_index()
                 genindexinstance.create_index(f_name)
                 genindexinstance.dump_index()
 
