@@ -81,6 +81,14 @@ def generate_to_index():
         genhtmlinstance.gen_all_to_html()
         # geninstance.clean()
         '''
+        posts = Post.query.all()
+        for post in posts:
+            f_name = os.path.join(INPUT_CONTENT, str(post.id) + '.md')
+            h_name = os.path.join(INPUT_CONTENT[:-2] + 'HTML', str(post.id) + '.html')
+            with open(f_name, 'w') as f:
+                f.write(post.body)
+            with open(h_name, 'w') as f:
+                f.write(post.body_html)
         
         for root, _, f_names in os.walk(INPUT_CONTENT):
             for f_name in f_names:
