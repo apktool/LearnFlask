@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 from .helper import IndexData
 from .generate import generate_html, generate_index
 from .render import render
+from ..models import Post
 from . import api
 from ..decorators import admin_required
 import os
@@ -17,8 +18,14 @@ INPUT_CONTENT = './app/blog/MD'
 def upload_article():
     f = request.files['md_file']
     name = secure_filename(f.filename)
-    f_name = os.path.join(os.getcwd(), INPUT_CONTENT, name)
-    f.save(f_name)
+
+    name = os.path.join(os.getcwd(), INPUT_CONTENT, name)
+    f.save(name)
+
+    f_name = str(Post.query.count() + 1) + '.' + name.split('.')[-1]
+    f_name = os.path.join(os.getcwd(), INPUT_CONTENT, f_name)
+
+    os.rename(name, f_name)
 
     '''
     geninstance = generate_html()
